@@ -6,7 +6,7 @@ import {
   StatusBar,
   TouchableOpacity,
 } from 'react-native';
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import Cabeza from './src/components/Cabeza';
 import Timer from './src/components/Timer';
 
@@ -18,11 +18,28 @@ const App = () => {
   const [currentTime, setCurrentTime] = useState('POMO' | 'SHORT' | 'BREAK');
   const [isActive, setIsActive] = useState(false);
 
-const iniciarParar=()=>{
-  setIsActive(!isActive); 
-}
+  useEffect(() => {
+    let interval = null;
+    if (isActive) {
+      interval = setInterval(() => {
+        setTime(time - 1);
+      }, 1000);
+    } else {
+      clearInterval(interval);
+    }
 
+    if(time===0){
+      setIsActive(false); 
+      setIsWorking(prev => !prev); 
+      setTime(isWorking ? 300 : 1500); 
+    }
 
+    return()=>clearInterval(interval)
+  }, [isActive, time]);
+
+  const iniciarParar = () => {
+    setIsActive(!isActive);
+  };
 
   return (
     <View style={[styles.container, {backgroundColor: colors[currentTime]}]}>
@@ -35,7 +52,7 @@ const iniciarParar=()=>{
       />
 
       <Timer time={time} />
-      <TouchableOpacity  onPress={iniciarParar}  style={styles.boton}>
+      <TouchableOpacity onPress={iniciarParar} style={styles.boton}>
         <Text style={{color: 'white', fontWeight: 'bold'}}>
           {' '}
           {isActive ? 'PARAR' : 'INICIAR'}{' '}
